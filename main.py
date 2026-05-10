@@ -163,7 +163,7 @@ def run_menu(screen, clock, font_big, font_med, font_sm, stars):
         # pulsing title
         pulse = int(190 + 65 * math.sin(t * 2.2))
         draw_text_centered(screen, "SPACE DEFENDER", font_big, (0, pulse, 255), 140)
-        draw_text_centered(screen, "Destrua asteroides e alcance 500 pontos!", font_sm, GRAY, 197)
+        draw_text_centered(screen, "Destrua asteroides e alcance 150 pontos!", font_sm, GRAY, 197)
 
         # controls box with alpha background
         box_x, box_y, box_w, box_h = 230, 242, 340, 178
