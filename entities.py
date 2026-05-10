@@ -64,16 +64,42 @@ class Player:
         if not self.visible:
             return
         x, y = self.x, self.y
+        hw = self.WIDTH // 2
+        hh = self.HEIGHT // 2
+
+        # engine flame (flickers each frame)
+        fh = random.randint(8, 18)
+        flame_outer = [
+            (x - 8, y + hh),
+            (x + 8, y + hh),
+            (x + 3, y + hh + fh // 2),
+            (x, y + hh + fh),
+            (x - 3, y + hh + fh // 2),
+        ]
+        flame_inner = [
+            (x - 4, y + hh),
+            (x + 4, y + hh),
+            (x, y + hh + fh // 2),
+        ]
+        pygame.draw.polygon(surface, (255, 120, 0), flame_outer)
+        pygame.draw.polygon(surface, (255, 230, 80), flame_inner)
+
         # ship: triangle body
         points = [
-            (x, y - self.HEIGHT // 2),
-            (x - self.WIDTH // 2, y + self.HEIGHT // 2),
-            (x + self.WIDTH // 2, y + self.HEIGHT // 2),
+            (x, y - hh),
+            (x - hw, y + hh),
+            (x + hw, y + hh),
         ]
-        pygame.draw.polygon(surface, (0, 200, 255), points)
-        pygame.draw.polygon(surface, (255, 255, 255), points, 2)
+        pygame.draw.polygon(surface, (0, 180, 230), points)
+        pygame.draw.polygon(surface, (100, 220, 255), points, 2)
+
+        # cockpit
+        pygame.draw.circle(surface, (180, 240, 255), (x, y - 2), 6)
+        pygame.draw.circle(surface, (0, 140, 200), (x, y - 2), 4)
+
         # cannon barrel
-        pygame.draw.rect(surface, (180, 180, 255), (x - 3, y - self.HEIGHT // 2 - 8, 6, 10))
+        pygame.draw.rect(surface, (140, 140, 210), (x - 3, y - hh - 10, 6, 12))
+        pygame.draw.rect(surface, (200, 200, 255), (x - 2, y - hh - 10, 4, 12))
 
 
 class Asteroid:
@@ -87,7 +113,9 @@ class Asteroid:
         self.color = random.choice([
             (160, 82, 45), (139, 90, 43), (120, 100, 60), (150, 130, 80)
         ])
+        self.highlight = tuple(min(255, c + 45) for c in self.color)
         self._build_shape()
+        self._build_crater()
 
     def _build_shape(self):
         r = self.radius
@@ -97,6 +125,14 @@ class Asteroid:
             angle = 2 * math.pi * i / count
             dist = r * random.uniform(0.7, 1.0)
             self.offsets.append((math.cos(angle) * dist, math.sin(angle) * dist))
+
+    def _build_crater(self):
+        # crater offset that rotates with the body
+        dist = self.radius * 0.28
+        angle = random.uniform(0, 2 * math.pi)
+        self.crater_off = (math.cos(angle) * dist, math.sin(angle) * dist)
+        self.crater_r = max(3, self.radius // 4)
+        self.crater_color = tuple(max(0, c - 35) for c in self.color)
 
     def update(self, dt):
         self.y += self.speed
@@ -118,7 +154,15 @@ class Asteroid:
     def draw(self, surface):
         pts = self.get_points()
         pygame.draw.polygon(surface, self.color, pts)
-        pygame.draw.polygon(surface, (220, 200, 150), pts, 2)
+        pygame.draw.polygon(surface, self.highlight, pts, 2)
+
+        # rotating crater
+        rad = math.radians(self.rotation)
+        cos_r, sin_r = math.cos(rad), math.sin(rad)
+        ox, oy = self.crater_off
+        cx = ox * cos_r - oy * sin_r + self.x
+        cy = ox * sin_r + oy * cos_r + self.y
+        pygame.draw.circle(surface, self.crater_color, (int(cx), int(cy)), self.crater_r)
 
     def collides_with_bullet(self, bullet):
         dx = bullet.x - self.x
@@ -157,5 +201,6 @@ class Bullet:
         return self.y < -self.RADIUS
 
     def draw(self, surface):
-        pygame.draw.circle(surface, (255, 255, 100), (int(self.x), int(self.y)), self.RADIUS)
-        pygame.draw.circle(surface, (255, 200, 0), (int(self.x), int(self.y)), self.RADIUS - 1)
+        # elongated laser bolt
+        pygame.draw.rect(surface, (255, 255, 100), (int(self.x) - 2, int(self.y) - 9, 4, 16))
+        pygame.draw.rect(surface, (255, 255, 255), (int(self.x) - 1, int(self.y) - 9, 2, 16))
