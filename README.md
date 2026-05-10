@@ -2,7 +2,7 @@
 
 2D space shooter built with Python and Pygame — university project.
 
-Destroy asteroids, survive long enough to reach **500 points**, and defend your ship from being hit 3 times.
+Destroy asteroids, survive long enough to reach **150 points**, and defend your ship from being hit 3 times.
 
 ---
 

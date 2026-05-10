@@ -7,7 +7,7 @@ from entities import Player, Asteroid, Bullet
 # --- Constants ---
 SCREEN_W, SCREEN_H = 800, 600
 FPS = 60
-VICTORY_SCORE = 500
+VICTORY_SCORE = 150
 
 # States
 MENU = "menu"
@@ -276,7 +276,7 @@ def run_playing(screen, clock, font_big, font_med, font_sm, stars):
         # red flash on player hit
         if flash_timer > 0:
             flash_timer -= dt
-            alpha = int(110 * (flash_timer / 0.25))
+            alpha = max(0, int(110 * (flash_timer / 0.25)))
             flash_surf = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
             flash_surf.fill((220, 0, 0, alpha))
             screen.blit(flash_surf, (0, 0))
